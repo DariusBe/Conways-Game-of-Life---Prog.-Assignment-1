@@ -25,6 +25,7 @@ void menuHeader();
 void menuHeader_chooseMode();
 void menuHeader_choosePercentage();
 void menuHeader_chooseSpeed();
+void menuHeader_stepByStepInfo();
 void menuHeader_chooseMatrix();
 
 
@@ -36,7 +37,7 @@ int rebirthTime;
 FILE* fp;
 
 int main() {
-	char userInput;
+	int userInput_matrixOrigin;
 
 	//standard value: around 50% of all cells will be initialized as living cells
 	char likelihood = 50;
@@ -47,11 +48,11 @@ int main() {
 	{
 		menuHeader();
 
-		scanf_s("%d", &userInput);
+		scanf_s("%d", &userInput_matrixOrigin);
 
-		switch (userInput) {
+		switch (userInput_matrixOrigin) {
 
-		/*	MENU OPTION 1: CONWAY'S BASED ON RANDOM MATRIX	*/
+			/*	MENU OPTION 1: CONWAY'S BASED ON RANDOM MATRIX	*/
 		case 1:
 
 			eraseScreen();
@@ -62,29 +63,40 @@ int main() {
 
 			fillInitialMatrixRandomly(likelihood);
 
-			eraseScreen();
-			gotoXY(0, 0);
-			menuHeader_chooseSpeed();
 
-			scanf_s("%d", &rebirthTime);
 
 			eraseScreen();
 			gotoXY(0, 0);
 			menuHeader_chooseMode();
 
-			scanf_s("%d", &userInput);
+			int userInput_stepByStepMode=0;
 
-			char selectStepByStepMode;
-			if (userInput == 2) selectStepByStepMode = 1;
+			scanf_s("%d", &userInput_stepByStepMode);
 
-			do {
+			eraseScreen();
+			gotoXY(0, 0);
+			menuHeader_stepByStepInfo();
 
-				gotoXY(8, 5);
+			if (userInput_stepByStepMode != 2) {
+			eraseScreen();
+			gotoXY(0, 0);
+			menuHeader_chooseSpeed();
+			scanf_s("%d", &rebirthTime);
+			}
 
-				printMatrix(matrixCurrGen);
+			gotoXY(8, 5);
 
-				if (selectStepByStepMode == 1) {
-					scanf("%c", &userInput);
+			printMatrix(matrixCurrGen);
+
+			while (getchar() != '\n');
+
+
+			while (1) {
+
+				if (userInput_stepByStepMode == 2) {
+					//scanf("%d", &userInput_stepByStepMode);
+					while (getchar() != '\n');
+					rebirthTime = 50;
 				}
 
 				Sleep(rebirthTime);
@@ -102,25 +114,25 @@ int main() {
 
 				printMatrix(matrixCurrGen);
 
-
-			} while (userInput);
+			}
 
 			break;
 
 
 
 
-		/*	MENU OPTION 2: CONWAY'S BASED ON PRESET MATRICES	*/
+			/*	MENU OPTION 2: CONWAY'S BASED ON PRESET MATRICES	*/
 
 		case 2:
 			eraseScreen();
 			gotoXY(0, 0);
-			menuHeader_chooseMatrix();
-
 			/* MENU TO CHOOSE MATRIX */
-			scanf_s("%d", &userInput);
 
-			switch (userInput) {
+			menuHeader_chooseMatrix();
+			int userInput_matrixFile;
+			scanf_s("%d", &userInput_matrixFile);
+
+			switch (userInput_matrixFile) {
 			case 1:
 				fp = fopen("matrix1.txt", "r");
 				break;
@@ -130,8 +142,8 @@ int main() {
 			case 3:
 				fp = fopen("matrix3.txt", "r");
 				break;
-			case 4:
-				fp = fopen("matrix4.txt", "r");
+			default:
+				fp = fopen("default.txt", "r");
 				break;
 			}
 
@@ -150,7 +162,7 @@ int main() {
 
 
 			for (int i = 0; i < ROWS; i++) {
-				for (int j = 0; j < COLS+1; j++) {
+				for (int j = 0; j < COLS + 1; j++) {
 					char s[] = "0";
 					fscanf(fp, "%c", &s[0]);
 					if (atoi(s) == 1) {
@@ -188,10 +200,11 @@ int main() {
 			fclose(fp);
 
 			break;
-		/*	Exit 3	*/
+
+
+			/*	Exit Game via menu option 3	*/
 		case 3:
 			return 0;
-		
 
 		default:
 			eraseScreen();
@@ -199,14 +212,9 @@ int main() {
 			printf("[ In Memory of John Horton Conway ]");
 			break;
 
-
-
-			}
-
-			gotoXY(0, 0);
-
 		}
-
+		gotoXY(0,0);
+	}
 
 	return 0;
 }
@@ -310,9 +318,9 @@ void gotoXY(int x, int y) {
 /*	MENU HEADER FUNCTIONS	*/
 
 void eraseScreen() {
-	gotoXY(5,1);
+	gotoXY(0,0);
 	for (int i=0; i<40; i++) {
-		printf("                                                         \n");
+		printf("                                                              \n");
 	}
 }
 
@@ -326,16 +334,17 @@ void menuHeader() {
 void menuHeader_choosePercentage() {
 	printf("\n\t\t\tCONWAY's GAME OF LIFE\n");
 	printf("\t=========================================================\n\t|");
-	printf("[  By what percentage shall the matrix be poulated?   ]");
+	printf("[  By what percentage shall the matrix be populated?  ]");
 	printf("|\n\t=========================================================\n\t>>>>\t");
 }
 
 void menuHeader_chooseSpeed() {
 	printf("\n\t\t\tCONWAY's GAME OF LIFE\n");
 	printf("\t=========================================================\n\t|");
-	printf("[ Please select Animation Speed in ms per generation. ]");
+	printf("[    Select Animation Speed in ms per generation.     ]");
 	printf("|\n\t=========================================================\n\t>>>>\t");
 }
+
 
 void menuHeader_chooseMode() {
 	printf("\n\t\t\tCONWAY's GAME OF LIFE\n");
@@ -344,11 +353,17 @@ void menuHeader_chooseMode() {
 	printf("|\n\t=========================================================\n\t>>>>\t");
 }
 
+void menuHeader_stepByStepInfo() {
+	printf("\n\t\t\tCONWAY's GAME OF LIFE\n");
+	printf("\t=========================================================\n\t|");
+	printf("[  Press [ Enter ] to continue with next generation.  ]");
+	printf("|\n\t=========================================================\n\t>>>>\t");
+}
 
 void menuHeader_chooseMatrix() {
 	printf("\n\t\t\tCONWAY's GAME OF LIFE\n");
 	printf("\t=========================================================\n\t|");
-	printf("[ MATRIX 1 ]  [ MATRIX 2 ]  [ MATRIX 3 ]  [ MATRIX 4 ]");
+	printf(" [ MATRIX 1 ]  [ MATRIX 2 ]  [ MATRIX 3 ]  [ DEFAULT ] ");
 	printf("|\n\t=========================================================\n\twhich file? >>");
 }
 
@@ -391,10 +406,17 @@ if (summe >= 3) arr[i][j] --> in Folgegeneration LEBEND
 */
 
 
-/*	TO
--DO's	*/
+/*	TO-DO's	*/
 /*
 	- check Exit function
 	- validation checks for all Inputs: mapping of "likelihood" input to fit percentage format
-	- default switch case implementation (what mode?)
+		Anzeigen: gültige Werte pro Abfrage
+				scanf("%d", &input); 
+				while (input != 1 && input !=2) {				für Intervalle: while(input < 0 )
+					printf("Choose valid value");
+					scanf("%d", &input);
+				}
+
+
+	- default switch case implementation (which mode?)
 */
